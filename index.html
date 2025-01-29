@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+
+file_get_contents(
+    'https://api.telegram.org/bot' . $_ENV['STATUS_BOT_TOKEN'] . '/setUserEmojiStatus?' . http_build_query([
+        'user_id' => $_ENV['STATUS_USER_ID'],
+        'emoji_status_custom_emoji_id' => (fn(DateTime $date): int => match (true) {
+            $date->format('dm') === '0302' => 5343939171725617118,
+            13 <= ($H = $date->format('H')) && $H < 14 => 5201809495491093573,
+            ($N = $date->format('N')) == 5 && 17 <= $H => 5203948303305158848,
+            $H < 4 || 20 < $H => 5467789694781630506,
+            $N < 6 && 8 <= $H && $H < 17 => 5418063924933173277,
+            default => 5348522520305740937,
+        })(new DateTime(timezone: new DateTimeZone('Europe/Moscow')))
+    ])
+);
