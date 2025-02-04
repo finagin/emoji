@@ -6,6 +6,7 @@ file_get_contents(
         'user_id' => $_ENV['STATUS_USER_ID'],
         'emoji_status_custom_emoji_id' => (fn(DateTime $date): int => match (true) {
             $date->format('dm') === '0302' => 5343939171725617118,
+            $date->format('dm') === '0402' => 5442644589703866634,
             13 <= ($H = $date->format('H')) && $H < 14 => 5201809495491093573,
             ($N = $date->format('N')) == 5 && 17 <= $H => 5203948303305158848,
             $H < 4 || 20 < $H => 5467789694781630506,
