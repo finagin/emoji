@@ -4,15 +4,31 @@
 file_get_contents(
     'https://api.telegram.org/bot' . $_ENV['STATUS_BOT_TOKEN'] . '/setUserEmojiStatus?' . http_build_query([
         'user_id' => $_ENV['STATUS_USER_ID'],
-        'emoji_status_custom_emoji_id' => (fn(DateTime $date): int => match (true) {
-            $date->format('dm') === '0302' => 5343939171725617118,
-            $date->format('dm') === '0402' => 5442644589703866634,
-            $date->format('dmY') <= '11012026' => 5442644589703866634,
-            13 <= ($H = $date->format('H')) && $H < 14 => 5201809495491093573,
-            ($N = $date->format('N')) == 5 && 17 <= $H => 5203948303305158848,
-            $H < 4 || 20 < $H => 5467789694781630506,
-            $N < 6 && 8 <= $H && $H < 17 => 5418063924933173277,
+        'emoji_status_custom_emoji_id' => (fn(\DateTimeInterface $d): int => match (true) {
+            $d->dm_eq('0302') => 5343939171725617118,
+            $d->dm_eq('0402') => 5442644589703866634,
+            $d->H_bt(13, 14) => 5201809495491093573,
+            $d->N_eq(5) && $d->H_gt(17) => 5203948303305158848,
+            $d->H_bt(20, 4) => 5467789694781630506,
+            $d->N_lt(6) && $d->H_bt(8, 17) => 5418063924933173277,
             default => 5348522520305740937,
-        })(new DateTime(timezone: new DateTimeZone('Europe/Moscow')))
+        })(new class (timezone: new DateTimeZone('Europe/Moscow')) extends \DateTimeImmutable {
+            public function __call(string $name, array $arguments)
+            {
+                [$format, $condition] = explode('_', $name.'_');
+                return match ($condition) {
+                    'eq' => $this->format($format) === $arguments[0],
+                    'ne' => $this->format($format) !== $arguments[0],
+                    'gt' => $this->format($format) > $arguments[0],
+                    'lt' => $this->format($format) < $arguments[0],
+                    'ge' => $this->format($format) >= $arguments[0],
+                    'le' => $this->format($format) <= $arguments[0],
+                    'bt' => $this->format($format) >= $arguments[0]
+                        && $this->format($format) < $arguments[1],
+                    default => $this->format($name),
+                };
+            }
+        })
     ])
 );
+
